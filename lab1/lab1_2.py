@@ -1,6 +1,4 @@
-# flake8: noqa: D103
 import numpy as np
-
 
 INPUT_FILE_NAME = "data/input_2.txt"
 

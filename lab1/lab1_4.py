@@ -1,6 +1,5 @@
 import numpy as np
 
-
 INPUT_FILE_PATH = "data/input_4.txt"
 
 
@@ -15,9 +14,8 @@ def read_array(input_file_path):
     return content
 
 
-def rotating_method(array, eps=0.01, make_copy=True):
-    if make_copy:
-        array = array.copy()
+def rotating_method(array, eps=0.01):
+    array = array.copy()
 
     if not np.array_equal(array, array.T):
         raise ValueError("Matrix should be simmetric")
@@ -56,8 +54,8 @@ def main():
     array = read_array(INPUT_FILE_PATH)
     U, diag_array = rotating_method(array, eps=1e-4)
     eigenvectors = U.T
-    eigenvalues = diag_array[np.eye(array.shape[0], dtype=bool)]
-    print(f"Eigenvectors:")
+    eigenvalues = np.diag(diag_array)
+    print("Eigenvectors:")
     for i in range(U.shape[0]):
         print(U[i], end=" ")
 
@@ -70,7 +68,7 @@ def main():
 
     print("Numpy:")
     eigenvalues, eigenvectors = np.linalg.eigh(array)
-    print(f"Eigenvectors:")
+    print("Eigenvectors:")
     for i in range(U.shape[0]):
         print(U[i], end=" ")
 

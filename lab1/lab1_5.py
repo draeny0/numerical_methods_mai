@@ -1,6 +1,5 @@
 import numpy as np
 
-
 INPUT_FILE_PATH = "data/input_5.txt"
 
 
@@ -14,6 +13,22 @@ def read_array(input_file_path):
 
     return array
 
+def converged(A, eps):
+    n = A.shape[0]
+    i = 0
+    while i < n - 1:
+        if abs(A[i+1:, i]).sum() < eps:
+            i += 1
+        else:
+            if i + 2 >= n:
+                i += 2
+            else:
+                if abs(A[i+2:, i+1]).sum() < eps:
+                    i += 2
+                else:
+                    return False
+    return True
+
 
 def eigvalues(array, eps=1e-3):
     n, m = array.shape
@@ -21,20 +36,21 @@ def eigvalues(array, eps=1e-3):
         raise ValueError("Matrix should be square")
 
     A = array.copy()
-    n_iter = 0
-    while n_iter != 10:
-        n_iter += 1
+    while True:
         Q, R = qr_decomposition(A)
         A = R @ Q
-        print(A, end="\n\n")
-        dim_indices = np.indices((n, n), sparse=True)
-        if euclidian_norm(A[dim_indices[0] > dim_indices[1]]) < eps:
+        if converged(A, eps):
             break
 
     eigvalues = np.empty(n, dtype=np.complex128)
     i = 0
     while i < n:
-        if euclidian_norm(A[i + 1 :, i]) < eps:
+        if i == n - 1:
+            eigvalues[i] = A[i, i]
+            i += 1
+            continue
+
+        if abs(A[i + 1, i]) < eps:
             eigvalues[i] = A[i, i]
             i += 1
             continue
@@ -47,8 +63,8 @@ def eigvalues(array, eps=1e-3):
         descriminant = np.sqrt((a + d) ** 2 - 4 * (a * d - b * c))
         eigvalues[i] = ((a + d) + descriminant) * 0.5
         eigvalues[i + 1] = ((a + d) - descriminant) * 0.5
-
         i += 2
+
     return eigvalues
 
 
@@ -62,9 +78,9 @@ def qr_decomposition(array):
     Q = np.eye(n)
     for i in range(n - 1):
         b = A[:, i]
-        v = b + np.sign(b) * euclidian_norm(b[i:]) * e[:, i]
-        v[:i] = 0
-        H_i = np.eye(n) - 2 * (v[:, None] @ v[None]) / (v[None] @ v[:, None]).item()
+        v = np.zeros_like(b)
+        v[i:] = b[i:] + np.sign(b[i:]) * euclidian_norm(b[i:]) * e[i:, i]
+        H_i = np.eye(n) - 2 * (v[:, None] @ v[None]) / (v[None] @ v[:, None])
         Q = Q @ H_i
         A = H_i @ A
 
@@ -78,8 +94,19 @@ def main():
     print("Q:\n", q)
     print("R:\n", r)
     print("Q @ R:\n", q @ r)
-    print("Eigvalues:\n", eigvalues(array))
+    print("Eigvalues:\n", eigvalues(array, eps=1e-2))
 
 
 if __name__ == "__main__":
     main()
+
+# №6
+# 8 -1 -3
+# -5 9 -8
+# 4 -5 7
+
+
+# №7
+# 9 0 2
+# -6 4 4
+# -2 -7 5

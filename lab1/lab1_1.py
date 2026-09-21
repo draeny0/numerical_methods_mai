@@ -1,7 +1,5 @@
-# flake8: noqa: D103
 import numpy as np
 from numpy.typing import NDArray
-
 
 INPUT_FILE_NAME = "data/input_1.txt"
 
@@ -12,9 +10,9 @@ def read_array(file_name):
     return array
 
 
-def inverse(array: NDArray, eps=1e-15):
+def inverse(array: NDArray):
     L, U, P = lu_decompose(array)
-    if np.abs(np.prod(U, where=np.eye(U.shape[0], dtype=bool))) < eps:
+    if np.abs(np.prod(np.diag(U))) < 1e-15:
         raise ValueError("The matrix is singular")
 
     m = array.shape[0]
@@ -39,7 +37,7 @@ def inverse(array: NDArray, eps=1e-15):
     return res
 
 
-def determinant(array: NDArray, eps=1e-17):
+def determinant(array: NDArray):
     _, U, P = lu_decompose(array)
     m = U.shape[0]
 
@@ -51,11 +49,11 @@ def determinant(array: NDArray, eps=1e-17):
         P[i], P[j] = P[j].copy(), P[i].copy()
         perm_count += 1
 
-    product = np.prod(U[np.eye(m, dtype=bool)])
-    if abs(product) < eps:
+    product = np.prod(np.diag(U))
+    if abs(product) < 1e-17:
         return 0
 
-    return (-1) ** perm_count * np.prod(U[np.eye(m, dtype=bool)])
+    return (-1) ** perm_count * np.prod(np.diag(U))
 
 
 def read_sle(file_name):
@@ -137,7 +135,7 @@ def main():
                 case "2":
                     A, b = read_sle(INPUT_FILE_NAME)
                     solution = solve_sle_using_lu(A, b)
-                    print(f"Solution:\n{solution}\n\nAx:\n{array @ solution}\n\n")
+                    print(f"Solution:\n{solution}\n\nAx:\n{A @ solution}\n\n")
                     assert np.linalg.norm(solution - np.linalg.solve(A, b)) < 1e-13
                 case "3":
                     array = read_array(INPUT_FILE_NAME)

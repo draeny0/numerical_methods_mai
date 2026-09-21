@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
+
 from lab1_1 import determinant
-from lab1_5 import eigvalues
 
 INPUT_FILE_NAME = "data/input_3.txt"
 
@@ -21,25 +21,22 @@ def seidel(A, b, eps):
     m, n = A.shape
     if m != n:
         raise ValueError("Matrix should be square")
-    if determinant(A) == 0:
-        raise ValueError("Matrix is singular")
 
     alpha_matrix = A.copy()
 
     x = b.copy()
-    diag = alpha_matrix[np.eye(m, dtype=bool)]
+    diag = np.diag(alpha_matrix).copy()
     beta = b / diag
-    alpha_matrix[np.eye(m, dtype=bool)] = 0
-    for i in range(m):
-        alpha_matrix[i] /= -diag[i]
+    alpha_matrix[np.diag_indices(n)] = 0
+    alpha_matrix /= -diag[:, None]
 
     alpha_norm_c = matrix_norm_c(alpha_matrix)
     if alpha_norm_c >= 1:
         raise ValueError("The method diverges for |A| >= 1")
 
     C = alpha_matrix.copy()
-    indices = np.indices((n, n))
-    C[indices[0] >= indices[1]] = 0
+          
+    C[np.tril_indices(n)] = 0
     c_norm = matrix_norm_c(C)
     t = 0
     x_new = x.copy()
@@ -66,11 +63,10 @@ def simple_iterations(A, b, eps):
     alpha_matrix = A.copy()
 
     x = b.copy()
-    diag = alpha_matrix[np.eye(m, dtype=bool)]
+    diag = np.diag(alpha_matrix).copy()
     beta = b / diag
-    alpha_matrix[np.eye(m, dtype=bool)] = 0
-    for i in range(m):
-        alpha_matrix[i] /= -diag[i]
+    alpha_matrix[np.diag_indices(n)] = 0
+    alpha_matrix /= -diag[:, None]
 
     alpha_norm_c = matrix_norm_c(alpha_matrix)
     if alpha_norm_c > 1 - 1e-13:
